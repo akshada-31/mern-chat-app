@@ -85,9 +85,11 @@ const MyChats = ({ fetchAgain }) => {
                 {chats ? (
                     <Stack overflowY="scroll">
                         {chats.map((chat) => {
-                            const valid =
-                                chat.isGroupChat ||
-                                (chat.users && chat.users.length >= 2 && chat.users.some(u => u?.name));
+                            if (!chat.users || chat.users.length < 2) return null;
+
+                            const otherUser = chat.users.find(u => u?._id !== loggedUser?._id);
+                            if (!chat.isGroupChat && (!otherUser || !otherUser.name)) return null;
+
 
                             if (!valid) return null;
 
