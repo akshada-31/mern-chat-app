@@ -34,7 +34,12 @@ const Login = () => {
                     "Content-type": "application/json",
                 },
             };
-            const { data } = await axios.post("http://localhost:5001/api/user/login", { email, password }, config);
+            const { data } = await axios.post(
+                `${process.env.REACT_APP_API_URL}/api/user/login`,
+                { email, password },
+                config
+            );
+
 
             toast({
                 title: "Registration Successfull",
