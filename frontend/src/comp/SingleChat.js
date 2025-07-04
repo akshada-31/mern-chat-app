@@ -20,7 +20,7 @@ import { io } from "socket.io-client";
 import Lottie from "react-lottie-player";
 import animationData from "../animations/typing.json";
 
-const ENDPOINT = process.env.REACT_APP_API_URL;
+const ENDPOINT = process.env.REACT_APP_API_URL || "http://localhost:5001";
 let socket;
 let selectedChatCompare;
 
