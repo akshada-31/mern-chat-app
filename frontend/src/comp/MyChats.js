@@ -91,7 +91,8 @@ const MyChats = ({ fetchAgain }) => {
                             if (!chat.isGroupChat && (!otherUser || !otherUser.name)) return null;
 
 
-                            if (!valid) return null;
+                            if (!chat || !chat._id) return null; // or any actual validation
+
 
                             return (
                                 <Box
