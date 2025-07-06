@@ -43,7 +43,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Start server
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT;
 const server = app.listen(PORT, () =>
     console.log(`🚀 Server started on port ${PORT}`.yellow.bold)
 );
