@@ -3,6 +3,8 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const colors = require("colors");
 const cors = require("cors");
+const rateLimit = require("express-rate-limit");
+
 
 const userRoutes = require("./routes/userRoutes");
 const chatRoutes = require("./routes/chatRoutes");
@@ -15,6 +17,14 @@ connectDB();
 const app = express();
 app.use(cors());
 app.use(express.json());
+const apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000,  // 1 minute
+    max: 100,  // limit each IP to 100 requests per minute
+    message: "⚠️ Too many requests. Please try again later.",
+});
+
+app.use("/api/", apiLimiter);  // apply limiter to all API routes
+
 
 
 
