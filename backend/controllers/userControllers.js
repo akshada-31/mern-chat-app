@@ -36,10 +36,16 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
 });
-
 const authUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+        res.status(400);
+        throw new Error("Please enter all the fields");
+    }
+
     const user = await User.findOne({ email });
+
     if (user && (await user.matchPassword(password))) {
         res.json({
             _id: user._id,
@@ -53,6 +59,7 @@ const authUser = asyncHandler(async (req, res) => {
         throw new Error("Invalid Email or Password");
     }
 });
+
 
 // /api/user?search=akshu
 

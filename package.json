@@ -27,5 +27,10 @@
     "react-notification-badge": "^1.5.1",
     "socket.io": "^4.8.1",
     "webpack": "^5.99.9"
+  },
+  "devDependencies": {
+    "jest": "^30.0.5",
+    "mongodb-memory-server": "^10.1.4",
+    "supertest": "^7.1.4"
   }
 }
