@@ -47,5 +47,42 @@ const allMessages = asyncHandler(async (req, res) => {
 
     res.json(messages);
 });
+// Edit Message
+const editMessage = asyncHandler(async (req, res) => {
+    const { content } = req.body;
+    const message = await Message.findById(req.params.id);
 
-module.exports = { sendMessage, allMessages };
+    if (!message) {
+        res.status(404);
+        throw new Error('Message not found');
+    }
+
+    if (message.sender.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error('Not authorized to edit this message');
+    }
+
+    message.content = content;
+    const updatedMessage = await message.save();
+    res.json(updatedMessage);
+});
+
+// Delete Message
+const deleteMessage = asyncHandler(async (req, res) => {
+    const message = await Message.findById(req.params.id);
+
+    if (!message) {
+        res.status(404);
+        throw new Error('Message not found');
+    }
+
+    if (message.sender.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error('Not authorized to delete this message');
+    }
+
+    await message.deleteOne();
+    res.json({ message: 'Message deleted' });
+});
+
+module.exports = { sendMessage, allMessages, editMessage, deleteMessage };
