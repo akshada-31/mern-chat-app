@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 
-const ProfileModal = ({ user, children }) => {
+const ProfileModal = ({ user, isOnline, lastSeen, children }) => {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     return (
@@ -59,6 +59,13 @@ const ProfileModal = ({ user, children }) => {
                             <Text fontSize="md" fontFamily="Work sans">
                                 Email: {user.email}
                             </Text>
+                            <Text fontSize="sm" mt={2} color={isOnline ? "green.500" : "gray.500"}>
+                                {isOnline
+                                    ? "Online"
+                                    : lastSeen
+                                        ? `Last seen: ${new Date(lastSeen).toLocaleString()}`
+                                        : "Offline"}
+                            </Text>
                         </Flex>
                     </ModalBody>
                     <ModalFooter justifyContent="center">
@@ -71,5 +78,4 @@ const ProfileModal = ({ user, children }) => {
         </>
     );
 };
-
 export default ProfileModal;

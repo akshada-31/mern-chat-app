@@ -77,7 +77,7 @@ const allUsers = asyncHandler(async (req, res) => {
         ? { ...keyword, _id: { $ne: req.user._id } } // exclude current user if logged in
         : keyword; // no exclusion if not logged in
 
-    const users = await User.find(query).select("name email pic");
+    const users = await User.find(query).select("name email pic online lastSeen");
     res.send(users);
 });
 

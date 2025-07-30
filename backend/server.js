@@ -1,9 +1,9 @@
-// server.js
 const http = require("http");
 const colors = require("colors");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const app = require("./app");
+const User = require("./models/userModel");
 
 dotenv.config();
 connectDB();
@@ -11,7 +11,6 @@ connectDB();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
 
-// Start server
 server.listen(PORT, () => {
     console.log(`🚀 Server started on port ${PORT}`.yellow.bold);
 });
@@ -25,14 +24,23 @@ const io = require("socket.io")(server, {
     },
 });
 
-// ✅ Make io accessible in request handlers
 app.set("socketio", io);
+
+const onlineUsers = new Map(); // userId -> socketId
 
 io.on("connection", (socket) => {
     console.log("✅ Socket.IO connected");
 
-    socket.on("setup", (userData) => {
+    socket.on("setup", async (userData) => {
         socket.join(userData._id);
+        onlineUsers.set(userData._id, socket.id);
+
+        // ✅ Mark user as online
+        await User.findByIdAndUpdate(userData._id, {
+            online: true,
+        });
+
+        io.emit("onlineUsers", Array.from(onlineUsers.keys())); // Notify all users
         socket.emit("connected");
     });
 
@@ -50,7 +58,23 @@ io.on("connection", (socket) => {
         });
     });
 
-    socket.on("disconnect", () => {
-        console.log("❌ User disconnected");
+    socket.on("disconnect", async () => {
+        try {
+            for (let [userId, socketId] of onlineUsers.entries()) {
+                if (socketId === socket.id) {
+                    onlineUsers.delete(userId);
+                    await User.findByIdAndUpdate(userId, {
+                        online: false,
+                        lastSeen: new Date(),
+                    });
+                    break;
+                }
+            }
+            io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+            console.log("❌ User disconnected");
+        } catch (err) {
+            console.error("Error updating user status on disconnect:", err);
+        }
     });
+
 });
