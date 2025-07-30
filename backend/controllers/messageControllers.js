@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Message = require("../models/messageModel");
 const Chat = require("../models/chatModel");
+const { io } = require("../server");
 
 // @desc    Send new message
 // @route   POST /api/message
@@ -50,39 +51,64 @@ const allMessages = asyncHandler(async (req, res) => {
 // Edit Message
 const editMessage = asyncHandler(async (req, res) => {
     const { content } = req.body;
-    const message = await Message.findById(req.params.id);
+    const message = await Message.findById(req.params.id)
+        .populate("sender", "name pic")
+        .populate({
+            path: "chat",
+            populate: { path: "users", select: "name pic email" }
+        });
 
     if (!message) {
         res.status(404);
         throw new Error('Message not found');
     }
 
-    if (message.sender.toString() !== req.user._id.toString()) {
+    if (message.sender._id.toString() !== req.user._id.toString()) {
         res.status(403);
         throw new Error('Not authorized to edit this message');
     }
 
     message.content = content;
     const updatedMessage = await message.save();
+
+    const io = req.app.get("socketio"); // Get io instance
+    message.chat.users.forEach(user => {
+        if (user._id.toString() !== req.user._id.toString()) {
+            io.to(user._id.toString()).emit("message edited", updatedMessage);
+        }
+    });
+
     res.json(updatedMessage);
 });
 
+
 // Delete Message
 const deleteMessage = asyncHandler(async (req, res) => {
-    const message = await Message.findById(req.params.id);
+    const message = await Message.findById(req.params.id)
+        .populate("chat")
+        .populate("sender");
 
     if (!message) {
         res.status(404);
         throw new Error('Message not found');
     }
 
-    if (message.sender.toString() !== req.user._id.toString()) {
+    if (message.sender._id.toString() !== req.user._id.toString()) {
         res.status(403);
         throw new Error('Not authorized to delete this message');
     }
 
     await message.deleteOne();
+
+    const io = req.app.get("socketio"); // Get io instance
+    message.chat.users.forEach(user => {
+        if (user._id.toString() !== req.user._id.toString()) {
+            io.to(user._id.toString()).emit("message deleted", message._id);
+        }
+    });
+
     res.json({ message: 'Message deleted' });
 });
+
 
 module.exports = { sendMessage, allMessages, editMessage, deleteMessage };

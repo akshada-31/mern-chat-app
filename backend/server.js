@@ -11,6 +11,7 @@ connectDB();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5001;
 
+// Start server
 server.listen(PORT, () => {
     console.log(`🚀 Server started on port ${PORT}`.yellow.bold);
 });
@@ -23,6 +24,9 @@ const io = require("socket.io")(server, {
         credentials: true,
     },
 });
+
+// ✅ Make io accessible in request handlers
+app.set("socketio", io);
 
 io.on("connection", (socket) => {
     console.log("✅ Socket.IO connected");
@@ -39,6 +43,7 @@ io.on("connection", (socket) => {
     socket.on("new message", (msg) => {
         const chat = msg.chat;
         if (!chat?.users) return;
+
         chat.users.forEach((user) => {
             if (user._id === msg.sender._id) return;
             socket.to(user._id).emit("message recieved", msg);

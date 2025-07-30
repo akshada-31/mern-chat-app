@@ -182,7 +182,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 !selectedChatCompare ||
                 selectedChatCompare._id !== newMessageRecieved.chat._id
             ) {
-                if (!notification.includes(newMessageRecieved)) {
+                if (!notification.some((n) => n._id === newMessageRecieved._id)) {
                     setNotification([newMessageRecieved, ...notification]);
                     setFetchAgain(!fetchAgain);
                 }
@@ -191,8 +191,25 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             }
         });
 
-        return () => socket.off("message recieved");
+        socket.on("message edited", (updatedMessage) => {
+            setMessages((prev) =>
+                prev.map((msg) =>
+                    msg._id === updatedMessage._id ? updatedMessage : msg
+                )
+            );
+        });
+
+        socket.on("message deleted", (deletedMessageId) => {
+            setMessages((prev) => prev.filter((msg) => msg._id !== deletedMessageId));
+        });
+
+        return () => {
+            socket.off("message recieved");
+            socket.off("message edited");
+            socket.off("message deleted");
+        };
     }, [notification, fetchAgain, selectedChatCompare]);
+
 
     const typingHandler = (e) => {
         setNewMessage(e.target.value);
