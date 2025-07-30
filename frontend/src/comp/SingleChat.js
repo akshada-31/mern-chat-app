@@ -32,6 +32,9 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     const [socketConnected, setSocketConnected] = useState(false);
     const [typing, setTyping] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
+    const [editingMessageId, setEditingMessageId] = useState(null);
+    const [editContent, setEditContent] = useState("");
+
     const toast = useToast();
 
     const defaultOptions = {
@@ -86,6 +89,62 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             }
         }
     };
+    const handleEditSubmit = async () => {
+        try {
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${user.token}`,
+                },
+            };
+
+            const { data } = await axios.put(`/api/message/${editingMessageId}`, { content: editContent }, config);
+
+            setMessages((prev) =>
+                prev.map((msg) => (msg._id === editingMessageId ? data : msg))
+            );
+
+            setEditingMessageId(null);
+            setEditContent("");
+        } catch (error) {
+            toast({
+                title: "Error Editing!",
+                description: "Could not update message",
+                status: "error",
+                duration: 4000,
+                isClosable: true,
+            });
+        }
+    };
+
+    const handleDelete = async (messageId) => {
+        try {
+            const config = {
+                headers: { Authorization: `Bearer ${user.token}` },
+            };
+            await axios.delete(`/api/message/${messageId}`, config);
+            setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+        } catch (error) {
+            toast({
+                title: "Error Deleting!",
+                description: "Could not delete message",
+                status: "error",
+                duration: 4000,
+                isClosable: true,
+            });
+        }
+    };
+
+    const startEdit = (message) => {
+        setEditingMessageId(message._id);
+        setEditContent(message.content);
+    };
+
+    const cancelEdit = () => {
+        setEditingMessageId(null);
+        setEditContent("");
+    };
+
 
     const fetchMessages = async () => {
         if (!selectedChat) return;
@@ -213,12 +272,22 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                             <Spinner size="xl" w={20} h={20} alignSelf="center" margin="auto" />
                         ) : (
                             <div className="messages">
-                                <ScrollableChat messages={messages} />
+                                <ScrollableChat
+                                    messages={messages}
+                                    user={user}
+                                    onEdit={startEdit}
+                                    onDelete={handleDelete}
+                                />
+
                             </div>
                         )}
 
-                        <FormControl onKeyDown={sendMessage} isRequired mt={3}>
-                            {isTyping && (
+                        <FormControl
+                            onKeyDown={editingMessageId ? null : sendMessage}
+                            isRequired
+                            mt={3}
+                        >
+                            {isTyping && !editingMessageId && (
                                 <Lottie
                                     loop
                                     play
@@ -229,11 +298,24 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                             <Input
                                 variant="filled"
                                 bg="#E0E0E0"
-                                placeholder="Enter a message..."
-                                value={newMessage}
-                                onChange={typingHandler}
+                                placeholder={
+                                    editingMessageId ? "Edit message..." : "Enter a message..."
+                                }
+                                value={editingMessageId ? editContent : newMessage}
+                                onChange={(e) =>
+                                    editingMessageId
+                                        ? setEditContent(e.target.value)
+                                        : typingHandler(e)
+                                }
                             />
+                            {editingMessageId && (
+                                <Box display="flex" mt={2} gap={2}>
+                                    <button onClick={handleEditSubmit}>Save</button>
+                                    <button onClick={cancelEdit}>Cancel</button>
+                                </Box>
+                            )}
                         </FormControl>
+
                     </Box>
                 </>
             ) : (
