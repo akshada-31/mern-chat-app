@@ -42,8 +42,7 @@ const ScrollableChat = ({ messages, user, onEdit, onDelete }) => {
                             )}
                         <span
                             style={{
-                                backgroundColor: `${m.sender._id === loggedInUser._id ? "#BEE3F8" : "#B9F5D0"
-                                    }`,
+                                backgroundColor: m.sender._id === loggedInUser._id ? "#BEE3F8" : "#B9F5D0",
                                 marginLeft: isSameSenderMargin(messages, m, i, loggedInUser._id),
                                 marginTop: isSameUser(messages, m, i, loggedInUser._id) ? 3 : 10,
                                 borderRadius: "20px",
@@ -51,10 +50,12 @@ const ScrollableChat = ({ messages, user, onEdit, onDelete }) => {
                                 maxWidth: "75%",
                                 position: "relative",
                                 display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
+                                flexWrap: "wrap",                    // ✅ allow wrapping
+                                overflowWrap: "anywhere",            // ✅ break long words
+                                wordBreak: "break-word",             // ✅ force wrap when needed
                             }}
                         >
+
                             <span style={{ flex: 1 }}>
                                 {m.content}
                                 {m.edited && (
