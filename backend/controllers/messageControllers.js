@@ -69,6 +69,7 @@ const editMessage = asyncHandler(async (req, res) => {
     }
 
     message.content = content;
+    message.edited = true;
     const updatedMessage = await message.save();
 
     const io = req.app.get("socketio"); // Get io instance
