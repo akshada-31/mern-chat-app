@@ -39,15 +39,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
     const toast = useToast();
 
-    const defaultOptions = {
-        loop: true,
-        autoplay: true,
-        animationData: animationData,
-        rendererSettings: {
-            preserveAspectRatio: "xMidYMid slice",
-        },
-    };
-
     useEffect(() => {
         socket = io(ENDPOINT, {
             transports: ["websocket"],
@@ -279,20 +270,13 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                                 )}
                             </Flex>
 
-                            {!selectedChat.isGroupChat && selectedChat?.users && (() => {
-                                const sender = getSenderFull(user, selectedChat.users);
-                                return (
-                                    <ProfileModal
-                                        user={chatUserInfo || sender}
-                                        isOnline={
-                                            chatUserInfo
-                                                ? chatUserInfo.online
-                                                : onlineUserIds.has(sender._id)
-                                        }
-                                        lastSeen={chatUserInfo?.lastSeen}
-                                    />
-                                );
-                            })()}
+                            {!selectedChat.isGroupChat && chatUserInfo && (
+                                <ProfileModal
+                                    user={chatUserInfo}
+                                    isOnline={chatUserInfo.online}
+                                    lastSeen={chatUserInfo.lastSeen}
+                                />
+                            )}
                         </Flex>
                     </Box>
 
