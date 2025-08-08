@@ -28,7 +28,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
     const [newMessage, setNewMessage] = useState("");
-    const { user, selectedChat, setSelectedChat, notification, setNotification } = ChatState();
+    const { user, selectedChat, setSelectedChat, notification, setNotification, onlineUserIds } = ChatState();
     const [socketConnected, setSocketConnected] = useState(false);
     const [typing, setTyping] = useState(false);
     const [isTyping, setIsTyping] = useState(false);
@@ -253,10 +253,17 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                         />
                         {!selectedChat.isGroupChat ? (
                             <>
-                                {selectedChat?.users && getSender(user, selectedChat.users)}
-                                {selectedChat?.users && (
-                                    <ProfileModal user={getSenderFull(user, selectedChat.users)} />
-                                )}
+                                {selectedChat?.users && (() => {
+                                    const sender = getSenderFull(user, selectedChat.users);
+                                    return (
+                                        <ProfileModal
+                                            user={sender}
+                                            isOnline={onlineUserIds.has(sender._id)}
+                                            lastSeen={sender.lastSeen}
+                                        />
+                                    );
+                                })()}
+
                             </>
                         ) : (
                             <>

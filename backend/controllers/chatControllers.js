@@ -130,7 +130,7 @@ const addToGroup = asyncHandler(async (req, res) => {
             new: true
         }
     )
-        .populate("users", "-password")
+        .populate("users", "-password online lastSeen")
         .populate("groupAdmin", "-password")
     if (!added) {
         res.status(404);
