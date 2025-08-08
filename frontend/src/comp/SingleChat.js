@@ -8,6 +8,7 @@ import {
     Spinner,
     Text,
     useToast,
+    Flex,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { getSender, getSenderFull } from "../config/ChatLogics";
@@ -34,6 +35,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     const [isTyping, setIsTyping] = useState(false);
     const [editingMessageId, setEditingMessageId] = useState(null);
     const [editContent, setEditContent] = useState("");
+    const [chatUserInfo, setChatUserInfo] = useState(null);
 
     const toast = useToast();
 
@@ -55,6 +57,26 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         socket.on("typing", () => setIsTyping(true));
         socket.on("stop typing", () => setIsTyping(false));
     }, [ENDPOINT, user]);
+
+    useEffect(() => {
+        const fetchUserStatus = async () => {
+            if (!selectedChat || selectedChat.isGroupChat) return;
+            const sender = getSenderFull(user, selectedChat.users);
+            try {
+                const config = {
+                    headers: {
+                        Authorization: `Bearer ${user.token}`,
+                    },
+                };
+                const { data } = await axios.get(`/api/user/${sender._id}`, config);
+                setChatUserInfo(data);
+            } catch (error) {
+                console.error("Failed to fetch user status", error);
+            }
+        };
+
+        fetchUserStatus();
+    }, [selectedChat, user]);
 
     const sendMessage = async (event) => {
         if (event.key === "Enter" && newMessage) {
@@ -89,6 +111,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
             }
         }
     };
+
     const handleEditSubmit = async () => {
         try {
             const config = {
@@ -144,7 +167,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         setEditingMessageId(null);
         setEditContent("");
     };
-
 
     const fetchMessages = async () => {
         if (!selectedChat) return;
@@ -210,7 +232,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         };
     }, [notification, fetchAgain, selectedChatCompare]);
 
-
     const typingHandler = (e) => {
         setNewMessage(e.target.value);
         if (!socketConnected) return;
@@ -236,50 +257,44 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         <>
             {selectedChat ? (
                 <>
-                    <Text
-                        fontSize={{ base: "28px", md: "30px" }}
-                        pb={3}
-                        px={2}
-                        w="100%"
-                        fontFamily="Work sans"
-                        display="flex"
-                        justifyContent={selectedChat.isGroupChat ? "flex-start" : "space-between"}
-                        alignItems="center"
-                    >
-                        <IconButton
-                            display={{ base: "flex", md: "none" }}
-                            icon={<ArrowBackIcon />}
-                            onClick={() => setSelectedChat("")}
-                        />
-                        {!selectedChat.isGroupChat ? (
-                            <>
-                                {selectedChat?.users && (() => {
-                                    const sender = getSenderFull(user, selectedChat.users);
-                                    return (
-                                        <ProfileModal
-                                            user={sender}
-                                            isOnline={onlineUserIds.has(sender._id)}
-                                            lastSeen={sender.lastSeen}
-                                        />
-                                    );
-                                })()}
+                    <Box w="100%" px={2} pb={3}>
+                        <Flex
+                            align="center"
+                            justify="space-between"
+                            fontSize={{ base: "24px", md: "26px" }}
+                            fontFamily="Work sans"
+                            fontWeight="bold"
+                        >
+                            <Flex align="center" gap={2}>
+                                <IconButton
+                                    display={{ base: "flex", md: "none" }}
+                                    icon={<ArrowBackIcon />}
+                                    onClick={() => setSelectedChat("")}
+                                    aria-label="Back"
+                                />
+                                {!selectedChat.isGroupChat ? (
+                                    <Text>{getSender(user, selectedChat.users)}</Text>
+                                ) : (
+                                    <Text>{selectedChat.chatName.toUpperCase()}</Text>
+                                )}
+                            </Flex>
 
-                            </>
-                        ) : (
-                            <>
-                                <Box flex="1" textAlign="left">
-                                    {selectedChat.chatName.toUpperCase()}
-                                </Box>
-                                <Box>
-                                    <UpdateGroupChatModal
-                                        fetchAgain={fetchAgain}
-                                        setFetchAgain={setFetchAgain}
-                                        fetchMessages={fetchMessages}
+                            {!selectedChat.isGroupChat && selectedChat?.users && (() => {
+                                const sender = getSenderFull(user, selectedChat.users);
+                                return (
+                                    <ProfileModal
+                                        user={chatUserInfo || sender}
+                                        isOnline={
+                                            chatUserInfo
+                                                ? chatUserInfo.online
+                                                : onlineUserIds.has(sender._id)
+                                        }
+                                        lastSeen={chatUserInfo?.lastSeen}
                                     />
-                                </Box>
-                            </>
-                        )}
-                    </Text>
+                                );
+                            })()}
+                        </Flex>
+                    </Box>
 
                     <Box
                         display="flex"
@@ -302,7 +317,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                                     onEdit={startEdit}
                                     onDelete={handleDelete}
                                 />
-
                             </div>
                         )}
 
@@ -339,7 +353,6 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                                 </Box>
                             )}
                         </FormControl>
-
                     </Box>
                 </>
             ) : (
