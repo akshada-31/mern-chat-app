@@ -1,34 +1,60 @@
-# 💬 Real-Time MERN Chat App
+# 💬 Chat App
 
-A real-time chat application built using the **MERN stack** (MongoDB, Express.js, React, Node.js) and **Socket.IO** for bi-directional communication between clients.
-
-## 🚀 Features
-
-- 🔐 User Authentication (JWT-based)
-- 💬 Real-time one-to-one and group chat
-- 🟢 Typing indicators
-- 📨 Instant message delivery using Socket.IO
-- 🧑‍🤝‍🧑 Group chat creation and management
-- 🔍 User search
-- 🖼️ Chat UI built with React and modern CSS
+A full-stack real-time chat application built with the MERN stack and Socket.IO. Supports 1-on-1 and group chats, live typing indicators, message editing and deletion, real-time online/offline tracking with last seen and many more features that are yet to be added.
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Tech Stack
 
-- **Frontend**: React, Axios, Context API
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB & Mongoose
-- **Real-Time Engine**: Socket.IO
-- **Authentication**: JWT, bcrypt
-- **Other Tools**: dotenv, cors, nodemon
+**Frontend:**
+- React
+- Chakra UI
+- Axios
+- Socket.IO Client
+- Lottie for typing animations
+
+**Backend:**
+- Node.js
+- Express
+- MongoDB + Mongoose
+- Socket.IO Server
+- JWT for Auth
+
+**Utilities:**
+- Cloudinary (for image uploads)
+- Docker (for containerized deployment)
 
 ---
 
-## 📦 Installation
+## 📸 Screenshots
 
-### 1. Clone the Repository
+🔐 Login Page:
+![Login](screenshots/login.png)
+
+📝 Signup Page:
+![Signup](screenshots/signup.png)
+
+💬 Chat Interface:
+![Chat](screenshots/chat.png)
+
+👤 Chat User Profile Modal:
+![ChatUserProfile](screenshots/chatUserProfile.png)
+
+🙍‍♀️ Current User Profile Modal:
+![CurrentUserProfile](screenshots/userProfile.png)
+
+
+
+## 🌐 Live Demo
+
+🔗 [https://talk-a-tive-g20h.onrender.com/](https://talk-a-tive-g20h.onrender.com/)
+
+---
+
+## 📦 Running Locally with Docker
+
+1. **Clone the repo**
 
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/akshada-31/mern-chat-app.git
+cd chat-app
