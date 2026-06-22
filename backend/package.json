@@ -16,5 +16,17 @@
   "devDependencies": {
     "jest": "^30.0.5",
     "supertest": "^7.1.4"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "colors": "^1.4.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-async-handler": "^1.2.0",
+    "express-rate-limit": "^8.5.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.1",
+    "socket.io": "^4.8.3"
   }
 }
