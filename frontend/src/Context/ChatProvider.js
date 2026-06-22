@@ -21,7 +21,10 @@ const ChatProvider = ({ children }) => {
         if (!userInfo) {
             navigate("/");
         } else {
-            socket = io(); // uses default from frontend proxy
+            socket = io("https://talk-a-tive-g20h.onrender.com", {
+                transports: ["websocket", "polling"],
+                withCredentials: true,
+            }); // uses default from frontend proxy
             socket.emit("setup", userInfo);
 
             socket.on("onlineUsers", (userIds) => {
@@ -30,7 +33,10 @@ const ChatProvider = ({ children }) => {
         }
 
         return () => {
-            if (socket) socket.disconnect();
+            if (socket) {
+                socket.off("onlineUsers");
+                socket.disconnect();
+            }
         };
     }, [navigate]);
 

@@ -5,7 +5,9 @@ const connectDB = require("./config/db");
 const app = require("./app");
 const User = require("./models/userModel");
 
-dotenv.config();
+const path = require("path");
+dotenv.config({ path: path.join(__dirname, ".env") });
+console.log("MONGO_URI =", process.env.MONGO_URI);
 connectDB();
 
 const server = http.createServer(app);
@@ -19,7 +21,10 @@ server.listen(PORT, () => {
 const io = require("socket.io")(server, {
     pingTimeout: 60000,
     cors: {
-        origin: "http://localhost:3000",
+        origin: [
+            "http://localhost:3000",
+            "https://talk-a-tive-g20h.onrender.com"
+        ],
         credentials: true,
     },
 });
