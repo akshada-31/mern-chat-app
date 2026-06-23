@@ -6,6 +6,9 @@ import App from './App';
 import { Provider } from "./components/ui/provider";
 import { BrowserRouter } from "react-router-dom"
 import ChatProvider from './Context/ChatProvider';
+import axios from "axios";
+
+axios.defaults.baseURL = "https://talk-a-tive-g20h.onrender.com";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
