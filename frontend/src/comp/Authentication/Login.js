@@ -50,7 +50,7 @@ const Login = () => {
             });
             localStorage.setItem("userInfo", JSON.stringify(data));
             setLoading(false);
-            navigate("/chats");
+            navigate("/");
         } catch (error) {
             console.error("Login error:", error); // ✅ optional, for debugging
 

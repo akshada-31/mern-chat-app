@@ -129,7 +129,7 @@ const Signup = () => {
             });
             localStorage.setItem("userInfo", JSON.stringify(data));
             setLoading(false);
-            navigate("/chats");
+            navigate("/");
         } catch (error) {
             console.error("Signup error:", error); // ✅ optional, for debugging
 

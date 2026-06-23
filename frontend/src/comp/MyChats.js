@@ -9,16 +9,19 @@ import GroupChatModal from "./miscellaneous/GroupChatModal";
 
 const MyChats = ({ fetchAgain }) => {
     const [loggedUser, setLoggedUser] = useState();
-    const { setSelectedChat, user, selectedChat, chats, setChats } = ChatState();
+    const { setSelectedChat, selectedChat, chats, setChats } = ChatState();
     const toast = useToast();
 
-    const fetchChats = async () => {
+    const fetchChats = async (token) => {
+        if (!token) return;
+
         try {
             const config = {
                 headers: {
-                    Authorization: `Bearer ${user.token}`,
+                    Authorization: `Bearer ${token}`,
                 },
             };
+
             const { data } = await axios.get("/api/chat", config);
             setChats(data);
         } catch (error) {
@@ -32,11 +35,15 @@ const MyChats = ({ fetchAgain }) => {
             });
         }
     };
-
     useEffect(() => {
-        setLoggedUser(JSON.parse(localStorage.getItem("userInfo")));
-        fetchChats();
-    }, [fetchAgain, user]);
+        const storedUser = JSON.parse(localStorage.getItem("userInfo"));
+
+        setLoggedUser(storedUser);
+
+        if (storedUser?.token) {
+            fetchChats(storedUser.token);
+        }
+    }, [fetchAgain]);
 
     return (
         <Box

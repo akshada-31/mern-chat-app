@@ -35,7 +35,6 @@ const ScrollableChat = ({ messages, user, onEdit, onDelete }) => {
                                         mr={1}
                                         size="sm"
                                         cursor="pointer"
-                                        name={m.sender.name}
                                         src={m.sender.pic}
                                     />
                                 </Tooltip>

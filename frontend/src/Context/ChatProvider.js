@@ -6,7 +6,9 @@ const ChatContext = createContext();
 let socket;
 
 const ChatProvider = ({ children }) => {
-    const [user, setUser] = useState();
+    const [user, setUser] = useState(() => {
+        return JSON.parse(localStorage.getItem("userInfo"));
+    });
     const [selectedChat, setSelectedChat] = useState();
     const [chats, setChats] = useState([]);
     const [notification, setNotification] = useState([]);
