@@ -7,6 +7,7 @@ import { Box } from "@chakra-ui/react";
 
 const Chatpage = () => {
     const { user } = ChatState();
+    console.log("Chatpage user:", user);
     const [fetchAgain, setFetchAgain] = useState(false);
 
     return <div style={{ width: "100%" }}>

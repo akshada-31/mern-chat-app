@@ -6,9 +6,7 @@ const ChatContext = createContext();
 let socket;
 
 const ChatProvider = ({ children }) => {
-    const [user, setUser] = useState(() => {
-        return JSON.parse(localStorage.getItem("userInfo"));
-    });
+    const [user, setUser] = useState(null);
     const [selectedChat, setSelectedChat] = useState();
     const [chats, setChats] = useState([]);
     const [notification, setNotification] = useState([]);
@@ -18,21 +16,24 @@ const ChatProvider = ({ children }) => {
 
     useEffect(() => {
         const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        console.log("ChatProvider userInfo:", userInfo);
         setUser(userInfo);
 
         if (!userInfo) {
-            navigate("/");
-        } else {
-            socket = io("https://talk-a-tive-g20h.onrender.com", {
-                transports: ["websocket", "polling"],
-                withCredentials: true,
-            }); // uses default from frontend proxy
-            socket.emit("setup", userInfo);
-
-            socket.on("onlineUsers", (userIds) => {
-                setOnlineUserIds(new Set(userIds));
-            });
+            return; // stop execution here
         }
+
+        // user exists → connect socket
+        socket = io("https://talk-a-tive-g20h.onrender.com", {
+            transports: ["websocket", "polling"],
+            withCredentials: true,
+        });
+
+        socket.emit("setup", userInfo);
+
+        socket.on("onlineUsers", (userIds) => {
+            setOnlineUserIds(new Set(userIds));
+        });
 
         return () => {
             if (socket) {

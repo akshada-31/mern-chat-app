@@ -4,17 +4,18 @@ import { useToast } from "@chakra-ui/react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 const Login = () => {
-    const [show, setShow] = useState(false)
+    const [show, setShow] = useState(false);
 
     const [email, setEmail] = useState();
     const [password, setPassword] = useState();
-    const [loading, setLoading] = useState();
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const toast = useToast();
 
     const handleClick = () => setShow(!show);
 
     const submitHandler = async () => {
+        console.log("BUTTON CLICKED");
         setLoading(true);
         if (!email || !password) {
             toast({
@@ -42,15 +43,18 @@ const Login = () => {
 
 
             toast({
-                title: "Registration Successfull",
+                title: "Registration successfull",
                 status: "success",
                 duration: 5000,
                 isClosable: true,
                 position: "bottom",
             });
+
             localStorage.setItem("userInfo", JSON.stringify(data));
-            setLoading(false);
-            navigate("/");
+            console.log("USER STORED:", data);
+            console.log("PATH BEFORE:", window.location.pathname);
+            navigate("/chats");
+
         } catch (error) {
             console.error("Login error:", error); // ✅ optional, for debugging
 
