@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const app = require("./app");
 const User = require("./models/userModel");
-let getAIReply = async () => "AI temporarily disabled";
+const { getAIReply } = require("./config/ai");
 
 const path = require("path");
 dotenv.config({ path: path.join(__dirname, ".env") });
@@ -55,6 +55,7 @@ io.on("connection", (socket) => {
     socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
     socket.on("new message", async (msg) => {
+        console.log("📨 FULL MESSAGE:", JSON.stringify(msg, null, 2));
         console.log("🔥 MESSAGE RECEIVED:", msg.content || msg.message);
         const chat = msg.chat;
         if (!chat?.users) return;
@@ -73,21 +74,30 @@ io.on("connection", (socket) => {
             chat.isAIChat === true; // optional future use
 
         if (isAIMessage) {
-            const aiReply = await getAIReply(cleanText);
+            try {
+                const cleanText = text.replace("@ai", "").trim();
 
-            const aiMessage = {
-                chat: msg.chat,
-                sender: {
-                    _id: "ai-bot",
-                    name: "AI Assistant",
-                    email: "ai@bot.com",
-                },
-                content: aiReply,
-            };
+                console.log("🤖 AI triggered:", cleanText);
 
-            chat.users.forEach((user) => {
-                socket.to(user._id).emit("message recieved", aiMessage);
-            });
+                const aiReply = await getAIReply(cleanText);
+
+                console.log("🤖 AI reply:", aiReply);
+
+                const aiMessage = {
+                    _id: `ai-${Date.now()}`,
+                    chat: msg.chat,
+                    sender: {
+                        _id: "ai-bot",
+                        name: "AI Assistant",
+                        email: "ai@bot.com",
+                    },
+                    content: aiReply,
+                };
+
+                socket.emit("message recieved", aiMessage);
+            } catch (err) {
+                console.error("❌ AI SOCKET ERROR:", err);
+            }
         }
     });
 
