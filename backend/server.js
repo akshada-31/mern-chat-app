@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const app = require("./app");
 const User = require("./models/userModel");
+const { getAIReply } = require("./config/ai");
 
 const path = require("path");
 dotenv.config({ path: path.join(__dirname, ".env") });
@@ -53,14 +54,43 @@ io.on("connection", (socket) => {
     socket.on("typing", (room) => socket.in(room).emit("typing"));
     socket.on("stop typing", (room) => socket.in(room).emit("stop typing"));
 
-    socket.on("new message", (msg) => {
+    socket.on("new message", async (msg) => {
+        console.log("🔥 MESSAGE RECEIVED:", msg.content || msg.message);
         const chat = msg.chat;
         if (!chat?.users) return;
 
+        // 1. Send normal message (your existing logic)
         chat.users.forEach((user) => {
             if (user._id === msg.sender._id) return;
             socket.to(user._id).emit("message recieved", msg);
         });
+
+        // 2. AI TRIGGER (NEW PART)
+        const text = msg.content || msg.message || "";
+
+        const isAIMessage =
+            text.startsWith("@ai") ||
+            chat.isAIChat === true; // optional future use
+
+        if (isAIMessage) {
+            const cleanText = text.replace("@ai", "").trim();
+
+            const aiReply = await getAIReply(cleanText);
+
+            const aiMessage = {
+                chat: msg.chat,
+                sender: {
+                    _id: "ai-bot",
+                    name: "AI Assistant",
+                    email: "ai@bot.com",
+                },
+                content: aiReply,
+            };
+
+            chat.users.forEach((user) => {
+                socket.to(user._id).emit("message recieved", aiMessage);
+            });
+        }
     });
 
     socket.on("disconnect", async () => {
