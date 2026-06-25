@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const app = require("./app");
 const User = require("./models/userModel");
-const { getAIReply } = require("./config/ai");
+let getAIReply = async () => "AI temporarily disabled";
 
 const path = require("path");
 dotenv.config({ path: path.join(__dirname, ".env") });
@@ -73,8 +73,6 @@ io.on("connection", (socket) => {
             chat.isAIChat === true; // optional future use
 
         if (isAIMessage) {
-            const cleanText = text.replace("@ai", "").trim();
-
             const aiReply = await getAIReply(cleanText);
 
             const aiMessage = {
